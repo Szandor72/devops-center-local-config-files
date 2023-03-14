@@ -1,10 +1,13 @@
 {
   "name": "devops-center-local-config-files",
   "version": "0.1.1-2",
+  "type": "module",
   "description": "PMD Rulesets, Eslint and Prettier Config as static files to use with Devops Center and GitHub Actions",
   "files": [
-    "pmd-rulesets/"
+    "pmd-rulesets/",
+    "src"
   ],
+  "postinstall": "node ./src/copyFiles.js",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/Szandor72/devops-center-local-config-files.git"
@@ -20,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/Szandor72/devops-center-local-config-files/issues"
   },
-  "homepage": "https://github.com/Szandor72/devops-center-local-config-files#readme"
+  "homepage": "https://github.com/Szandor72/devops-center-local-config-files#readme",
+  "dependencies": {
+    "ncp": "^2.0.0"
+  }
 }
