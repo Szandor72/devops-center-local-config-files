@@ -4,6 +4,8 @@
   "description": "PMD Rulesets, Eslint and Prettier Config as static files to use with Devops Center and GitHub Actions",
   "files": [
     "eslint-config/",
+    "jest-config/",
+    "js-config/",
     "pmd-rulesets/",
     "prettier-config/",
     "src"
