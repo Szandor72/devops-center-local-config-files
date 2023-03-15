@@ -38,6 +38,27 @@ const eslintConfigFiles = [
   },
 ];
 
+const jestConfigFiles = [
+  {
+    src: path.join(sourcePath, "jest-config", "jest.config.js"),
+    dest: path.join(targetPath, "jest.config.js"),
+  },
+];
+
+const jsConfigFiles = [
+  {
+    src: path.join(sourcePath, "js-config", "jsconfig.json"),
+    dest: path.join(
+      targetPath,
+      "force-app",
+      "main",
+      "default",
+      "lwc",
+      "jsconfig.json"
+    ),
+  },
+];
+
 const pmdConfigFiles = [
   {
     src: path.join(sourcePath, "pmd-rulesets", "apex-ruleset.xml"),
@@ -58,6 +79,8 @@ const prettierConfigFiles = [
 
 const filesToCopy = [
   ...eslintConfigFiles,
+  ...jestConfigFiles,
+  ...jsConfigFiles,
   ...pmdConfigFiles,
   ...prettierConfigFiles,
 ];
