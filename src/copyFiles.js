@@ -1,5 +1,5 @@
-import ncp from "ncp";
-import path from "path";
+const path = require("path");
+const fs = require("fs-extra");
 
 const filesToCopy = [
   {
@@ -12,30 +12,29 @@ const filesToCopy = [
     ),
     dest: path.join(process.env.INIT_CWD, "apex-ruleset.xml"),
   },
-  //   {
-  //     src: path.join($INIT_CWD, 'node_modules', 'my-package', 'file2.js'),
-  //     dest: path.join($INIT_CWD, 'lib', 'file2.js'),
-  //   },
-  //   {
-  //     src: path.join($INIT_CWD, 'node_modules', 'my-package', 'file3.js'),
-  //     dest: path.join($INIT_CWD, 'dist', 'file3.js'),
-  //   },
 ];
 
-const copyFile = (src, dest) => {
-  ncp(src, dest, { clobber: false, stopOnErr: true }, (err) => {
-    if (err) {
-      console.error(`Failed to copy ${src}: ${err}`);
-      process.exit(1);
-    }
-
+const copyFile = async (src, dest) => {
+  try {
+    fs.copy(src, dest, {
+      overwrite: false,
+      errorOnExist: true,
+      stopOnErr: true,
+    });
     console.log(`Successfully copied ${src} to ${dest}`);
-  });
+  } catch (error) {
+    console.error(`Failed to copy ${src}: ${error}`);
+    process.exit(1);
+  }
 };
 
-const copyFiles = () => {
+const copyFiles = async () => {
   for (const file of filesToCopy) {
-    copyFile(file.src, file.dest);
+    if (fs.existsSync(file.dest)) {
+      console.log(`File ${file.dest} already exists, skipping...`);
+      continue;
+    }
+    await copyFile(file.src, file.dest);
   }
 
   console.log("All files copied successfully!");
