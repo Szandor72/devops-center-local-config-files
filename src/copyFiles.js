@@ -1,43 +1,87 @@
 const path = require("path");
 const fs = require("fs-extra");
 
-const filesToCopy = [
+const sourcePath = path.join(
+  process.env.INIT_CWD,
+  "node_modules",
+  "devops-center-local-config-files"
+);
+
+const targetPath = process.env.INIT_CWD;
+
+const eslintConfigFiles = [
   {
-    src: path.join(
-      process.env.INIT_CWD,
-      "node_modules",
-      "devops-center-local-config-files",
-      "pmd-rulesets",
-      "apex-ruleset.xml"
+    src: path.join(sourcePath, "eslint-config", ".eslintignore"),
+    dest: path.join(targetPath, ".eslintignore"),
+  },
+  {
+    src: path.join(sourcePath, "eslint-config", "aura-eslintrc.json"),
+    dest: path.join(
+      targetPath,
+      "force-app",
+      "main",
+      "default",
+      "aura",
+      ".eslintrc.json"
     ),
-    dest: path.join(process.env.INIT_CWD, "apex-ruleset.xml"),
+  },
+  {
+    src: path.join(sourcePath, "eslint-config", "lwc-eslintrc.json"),
+    dest: path.join(
+      targetPath,
+      "force-app",
+      "main",
+      "default",
+      "lwc",
+      ".eslintrc.json"
+    ),
   },
 ];
 
-const copyFile = async (src, dest) => {
+const pmdConfigFiles = [
+  {
+    src: path.join(sourcePath, "pmd-rulesets", "apex-ruleset.xml"),
+    dest: path.join(targetPath, ".pmd", "apex-ruleset.xml"),
+  },
+];
+
+const prettierConfigFiles = [
+  {
+    src: path.join(sourcePath, "prettier-config", ".prettierrc"),
+    dest: path.join(targetPath, ".prettierrc"),
+  },
+  {
+    src: path.join(sourcePath, "prettier-config", ".prettierignore"),
+    dest: path.join(targetPath, ".prettierignore"),
+  },
+];
+
+const filesToCopy = [
+  ...eslintConfigFiles,
+  ...pmdConfigFiles,
+  ...prettierConfigFiles,
+];
+
+const copyFile = (src, dest) => {
+  const filename = path.basename(src);
   try {
-    fs.copy(src, dest, {
-      overwrite: false,
-      errorOnExist: true,
-      stopOnErr: true,
-    });
-    console.log(`Successfully copied ${src} to ${dest}`);
+    fs.copySync(src, dest);
+    console.log(`Copied ${filename}`);
   } catch (error) {
-    console.error(`Failed to copy ${src}: ${error}`);
+    console.error(`Failed to copy ${filename}: ${error}`);
     process.exit(1);
   }
 };
 
-const copyFiles = async () => {
+const copyFiles = () => {
   for (const file of filesToCopy) {
     if (fs.existsSync(file.dest)) {
       console.log(`File ${file.dest} already exists, skipping...`);
       continue;
     }
-    await copyFile(file.src, file.dest);
+    fs.ensureDirSync(path.dirname(file.dest));
+    copyFile(file.src, file.dest);
   }
-
-  console.log("All files copied successfully!");
 };
 
 copyFiles();
