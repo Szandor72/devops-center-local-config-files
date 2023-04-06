@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset
+   name="sObject Custom Ruleset"
+   xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd"
+>
+   <description>Quickstart configuration of PMD for Salesforce.com sObjects. Rules for naming
+      sObjects and fields</description>
+
+   <rule
+      name="NoUnderscoresInCustomFields"
+      language="xml"
+      message="Custom Field Names should not contain underscores"
+      class="net.sourceforge.pmd.lang.rule.XPathRule"
+   >
+      <description>
+
+      </description>
+      <priority>1</priority>
+      <properties>
+         <property name="version" value="2.0" />
+         <property name="xpath">
+            <value>
+               <![CDATA[
+               /CustomField/fullName/text[contains(replace(text(),'__c',''),'_')]
+               ]]>
+           </value>
+         </property>
+      </properties>
+   </rule>
+
+
+   <rule
+      name="NoUnderscoresInCustomObjectNames"
+      language="xml"
+      message="Custom Object Names should not contain underscores"
+      class="net.sourceforge.pmd.lang.rule.XPathRule"
+   >
+      <description>
+
+      </description>
+      <priority>1</priority>
+      <properties>
+         <property name="version" value="2.0" />
+         <property name="xpath">
+            <value>
+               <![CDATA[
+               /CustomObject[contains(replace(pmd:fileName(),'__c',''),'_')]
+               ]]>
+           </value>
+         </property>
+      </properties>
+   </rule>
+
+   <rule
+      name="CustomObjectNamesShouldStartWithUppercase"
+      language="xml"
+      message="Custom Object Names should start with an uppercase letter"
+      class="net.sourceforge.pmd.lang.rule.XPathRule"
+   >
+      <description>
+
+      </description>
+      <priority>1</priority>
+      <properties>
+         <property name="version" value="2.0" />
+         <property name="xpath">
+            <value>
+               <![CDATA[
+               /CustomObject[starts-with(substring(pmd:fileName(), 1, 1), substring(lower-case(pmd:fileName()), 1, 1))]
+               ]]>
+           </value>
+         </property>
+      </properties>
+   </rule>
+
+   <rule
+      name="CustomFieldNamesShouldStartWithUppercase"
+      language="xml"
+      message="Custom Field Names should start with an uppercase letter"
+      class="net.sourceforge.pmd.lang.rule.XPathRule"
+   >
+      <description>
+
+      </description>
+      <priority>1</priority>
+      <properties>
+         <property name="version" value="2.0" />
+         <property name="xpath">
+            <value>
+               <![CDATA[
+               /CustomField/fullName/text[starts-with(substring(@Image, 1, 1), substring(lower-case(@Image), 1, 1))]
+               ]]>
+           </value>
+         </property>
+      </properties>
+   </rule>
+
+</ruleset>

@@ -64,6 +64,10 @@ const pmdConfigFiles = [
     src: path.join(sourcePath, "pmd-rulesets", "apex-ruleset.xml"),
     dest: path.join(targetPath, ".pmd", "apex-ruleset.xml"),
   },
+  {
+    src: path.join(sourcePath, "pmd-rulesets", "sobject-ruleset.xml"),
+    dest: path.join(targetPath, ".pmd", "sobject-ruleset.xml"),
+  },
 ];
 
 const prettierConfigFiles = [
