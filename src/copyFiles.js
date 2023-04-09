@@ -65,6 +65,14 @@ const pmdConfigFiles = [
     dest: path.join(targetPath, ".pmd", "apex-ruleset.xml"),
   },
   {
+    src: path.join(sourcePath, "pmd-rulesets", "flow-ruleset.xml"),
+    dest: path.join(targetPath, ".pmd", "flow-ruleset.xml"),
+  },
+  {
+    src: path.join(sourcePath, "pmd-rulesets", "misc-ruleset.xml"),
+    dest: path.join(targetPath, ".pmd", "misc-ruleset.xml"),
+  },
+  {
     src: path.join(sourcePath, "pmd-rulesets", "sobject-ruleset.xml"),
     dest: path.join(targetPath, ".pmd", "sobject-ruleset.xml"),
   },

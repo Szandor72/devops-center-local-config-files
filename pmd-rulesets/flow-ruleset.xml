@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset
+    name="Flow Ruleset"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd"
+>
+    <description>Quickstart configuration of PMD for Flows</description>
+
+    <rule
+        name="PrefixSubflowLabel"
+        language="xml"
+        message="A Subflow's label should start with SFL"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow/label/text[not(starts-with(@Image,'SFL')) and //Flow/processType/text[@Image = 'AutoLaunchedFlow']]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="PrefixSubflowApiName"
+        language="xml"
+        message="A Subflow's API Name should start with SFL"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow/processType/text[@Image = 'AutoLaunchedFlow' and not(starts-with(pmd:fileName(),'SFL'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireFlowAutolayout"
+        language="xml"
+        message="Flows must use Auto Layout"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//processMetadataValues[name/text/@Image = 'CanvasMode' and not(value/stringValue/text[@Image = 'AUTO_LAYOUT_CANVAS'])]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule
+        name="RequireFlowVariableSuffix"
+        language="xml"
+        message="_VAR Suffix missing for Flow Variable"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//variables/name/text[not(ends-with(@Image,'_VAR') or ends-with(@Image,'_Filter'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireDeleteRecordSuffix"
+        language="xml"
+        message="_DELETE Suffix missing for Delete Record Action"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//recordDeletes/name/text[not(ends-with(@Image,'_DELETE'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireCreateRecordSuffix"
+        language="xml"
+        message="_CREATE Suffix missing for Create Record Action"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//recordCreates/name/text[not(ends-with(@Image,'_CREATE'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule
+        name="RequireGetRecordSuffix"
+        language="xml"
+        message="_RECORD Suffix missing for Get Record Action"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//recordLookups/name/text[not(ends-with(@Image,'_RECORD'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule
+        name="RequireUpdateRecordSuffix"
+        language="xml"
+        message="_UPDATE Suffix missing for Get Record Action"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//recordUpdates/name/text[not(ends-with(@Image,'_UPDATE'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireScreenSuffix"
+        language="xml"
+        message="_SCREEN Suffix missing for Screen Element"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//screens/name/text[not(ends-with(@Image,'_SCREEN'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireActionSuffix"
+        language="xml"
+        message="_ACTION Suffix missing for prebuilt Flow Action"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//actionCalls/name/text[not(ends-with(@Image,'_ACTION'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule
+        name="RequireSubflowSuffix"
+        language="xml"
+        message="_SUBFLOW Suffix missing for Subflows used within another Flow"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//subflows/name/text[not(ends-with(@Image,'_SUBFLOW'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireAssignmentSuffix"
+        language="xml"
+        message="_ASSIGN Suffix missing for Assign Element"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//assignments/name/text[not(ends-with(@Image,'_ASSIGN'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireDecisionSuffix"
+        language="xml"
+        message="_DECISION Suffix missing for Decision Element"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//decisions/name/text[not(ends-with(@Image,'_DECISION'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule
+        name="RequireLoopSuffix"
+        language="xml"
+        message="_LOOP Suffix missing for Loop Element"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//loops/name/text[not(ends-with(@Image,'_LOOP'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+    <rule
+        name="RequireTextTemplateSuffix"
+        language="xml"
+        message="_TEMPLATE Suffix missing for Text Template Element"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//textTemplates/name/text[not(ends-with(@Image,'_TEMPLATE'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule
+        name="RequireCollectionFilterSuffix"
+        language="xml"
+        message="_FILTER Suffix missing for Filter Collection Element"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+            <![CDATA[
+            /Flow//collectionProcessors[collectionProcessorType[text[@Image = 'FilterCollectionProcessor' ]]]/name/text[not(ends-with(@Image, '_FILTER'))]
+            ]]>
+        </value>
+            </property>
+        </properties>
+    </rule>
+
+
+    <rule
+        name="RequireCollectionSortSuffix"
+        language="xml"
+        message="_SORT Suffix missing for Sort Collection Element"
+        class="net.sourceforge.pmd.lang.rule.XPathRule"
+    >
+        <description>
+
+        </description>
+        <priority>1</priority>
+        <properties>
+            <property name="version" value="2.0" />
+            <property name="xpath">
+                <value>
+        <![CDATA[
+        /Flow//collectionProcessors[collectionProcessorType[text[@Image = 'SortCollectionProcessor' ]]]/name/text[not(ends-with(@Image, '_SORT'))]
+        ]]>
+    </value>
+            </property>
+        </properties>
+    </rule>
+
+</ruleset>
