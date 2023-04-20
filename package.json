@@ -1,6 +1,6 @@
 {
   "name": "devops-center-local-config-files",
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "PMD Rulesets, Eslint and Prettier Config as static files to use with Devops Center and GitHub Actions",
   "files": [
     "eslint-config/",
