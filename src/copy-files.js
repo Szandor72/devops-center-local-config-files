@@ -1,5 +1,5 @@
-const path = require("path");
-const fs = require("fs-extra");
+import path = require("path");
+import fs = require("fs-extra");
 
 const sourcePath = path.join(
   process.env.INIT_CWD,
@@ -8,6 +8,25 @@ const sourcePath = path.join(
 );
 
 const targetPath = process.env.INIT_CWD;
+
+const ciScripts = [
+  {
+    src: path.join(sourcePath, "ci-scripts", "prepare-scan.js"),
+    dest: path.join(
+      targetPath,
+      ".ci",
+      "prepare-scan.js"
+    ),
+  },
+  {
+    src: path.join(sourcePath, "ci-scripts", "parse-scan-results.js"),
+    dest: path.join(
+      targetPath,
+      ".ci",
+      "parse-scan-results.js"
+    ),
+  },
+]
 
 const eslintConfigFiles = [
   {
@@ -90,6 +109,7 @@ const prettierConfigFiles = [
 ];
 
 const filesToCopy = [
+  ...ciScripts,
   ...eslintConfigFiles,
   ...jestConfigFiles,
   ...jsConfigFiles,
@@ -108,7 +128,7 @@ const copyFile = (src, dest) => {
   }
 };
 
-const copyFiles = () => {
+const main = () => {
   for (const file of filesToCopy) {
     if (fs.existsSync(file.dest)) {
       console.log(`File ${file.dest} already exists, skipping...`);
@@ -119,4 +139,4 @@ const copyFiles = () => {
   }
 };
 
-copyFiles();
+main();
