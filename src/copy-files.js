@@ -1,5 +1,5 @@
-import path = require("path");
-import fs = require("fs-extra");
+import path from "path";
+import fs from "fs-extra";
 
 const sourcePath = path.join(
   process.env.INIT_CWD,
@@ -12,21 +12,13 @@ const targetPath = process.env.INIT_CWD;
 const ciScripts = [
   {
     src: path.join(sourcePath, "ci-scripts", "prepare-scan.js"),
-    dest: path.join(
-      targetPath,
-      ".ci",
-      "prepare-scan.js"
-    ),
+    dest: path.join(targetPath, ".ci", "prepare-scan.js"),
   },
   {
     src: path.join(sourcePath, "ci-scripts", "parse-scan-results.js"),
-    dest: path.join(
-      targetPath,
-      ".ci",
-      "parse-scan-results.js"
-    ),
+    dest: path.join(targetPath, ".ci", "parse-scan-results.js"),
   },
-]
+];
 
 const eslintConfigFiles = [
   {
