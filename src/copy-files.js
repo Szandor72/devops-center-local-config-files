@@ -51,8 +51,8 @@ const eslintConfigFiles = [
 
 const jestConfigFiles = [
   {
-    src: path.join(sourcePath, "jest-config", "jest.config.js"),
-    dest: path.join(targetPath, "jest.config.js"),
+    src: path.join(sourcePath, "jest-config", "jest.config.cjs"),
+    dest: path.join(targetPath, "jest.config.cjs"),
   },
 ];
 
