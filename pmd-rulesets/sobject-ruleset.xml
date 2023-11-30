@@ -8,6 +8,29 @@
    <description>Quickstart configuration of PMD for Salesforce.com sObjects. Rules for naming
       sObjects and fields</description>
 
+
+   <rule
+      name="NoDescriptionInCustomFields"
+      language="xml"
+      message="Custom Fields need a description"
+      class="net.sourceforge.pmd.lang.rule.XPathRule"
+   >
+      <description>
+
+      </description>
+      <priority>1</priority>
+      <properties>
+         <property name="version" value="2.0" />
+         <property name="xpath">
+            <value>
+               <![CDATA[
+               //CustomField[not(description)]
+               ]]>
+           </value>
+         </property>
+      </properties>
+   </rule>
+
    <rule
       name="NoUnderscoresInCustomFields"
       language="xml"
@@ -23,7 +46,7 @@
          <property name="xpath">
             <value>
                <![CDATA[
-               /CustomField/fullName/text[contains(replace(text(),'__c',''),'_')]
+               /CustomField/fullName/text[contains(replace(@Image,'__c',''),'_')]
                ]]>
            </value>
          </property>
