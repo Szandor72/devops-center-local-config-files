@@ -1,10 +1,10 @@
 // receives scan results from sfdx scanner in json format within GitHub Action context and handles them accordingly
-import execa from 'execa';
-import crypto from 'crypto';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { AsyncParser } from '@json2csv/node';
-import * as core from '@actions/core';
+import execa from "execa";
+import crypto from "crypto";
+import { promises as fs } from "fs";
+import path from "path";
+import { AsyncParser } from "@json2csv/node";
+import * as core from "@actions/core";
 
 /**
  * Flattens JSON data for CSV, Markdown, and annotation processing.
@@ -12,15 +12,15 @@ import * as core from '@actions/core';
  * @returns {Array} Flattened data array.
  */
 function flattenJsonData(dataArray) {
-    let flattenedData = dataArray.flatMap(item =>
-        item.violations.map(violation => ({
-            engine: item.engine,
-            fileName: item.fileName.substring(item.fileName.indexOf('force-app')),
-            ...violation,
-            message: violation.message.trim(),
-        })),
-    );
-    return flattenedData;
+  let flattenedData = dataArray.flatMap((item) =>
+    item.violations.map((violation) => ({
+      engine: item.engine,
+      fileName: item.fileName.substring(item.fileName.indexOf("force-app")),
+      ...violation,
+      message: violation.message.trim(),
+    }))
+  );
+  return flattenedData;
 }
 
 /**
@@ -29,10 +29,10 @@ function flattenJsonData(dataArray) {
  * @param {string} csvFilePath - Path to the output CSV file.
  */
 async function convertJsonToCsv(flattenedData, csvFilePath) {
-    const parser = new AsyncParser();
-    const csvData = await parser.parse(flattenedData).promise();
-    await fs.writeFile(csvFilePath, csvData);
-    console.log(`Converted to CSV at ${csvFilePath}`);
+  const parser = new AsyncParser();
+  const csvData = await parser.parse(flattenedData).promise();
+  await fs.writeFile(csvFilePath, csvData);
+  console.log(`Converted to CSV at ${csvFilePath}`);
 }
 
 /**
@@ -40,40 +40,44 @@ async function convertJsonToCsv(flattenedData, csvFilePath) {
  * @param {Array} flattenedData - The array of flattened JSON objects.
  */
 async function createGithubTable(flattenedData) {
-    const headers = Object.keys(flattenedData[0]).reduce(
-        (acc, key) => {
-            if (!['endLine', 'endColumn', 'url', 'normalizedSeverity'].includes(key)) {
-                acc.push({ data: key, header: true });
-            }
-            return acc;
-        },
-        [{ data: 'PASSED?', header: true }],
+  const headers = Object.keys(flattenedData[0]).reduce(
+    (acc, key) => {
+      if (
+        !["endLine", "endColumn", "url", "normalizedSeverity"].includes(key)
+      ) {
+        acc.push({ data: key, header: true });
+      }
+      return acc;
+    },
+    [{ data: "PASSED?", header: true }]
+  );
+
+  const tableRows = flattenedData.map((row) => {
+    const rowValues = Object.entries(row).reduce(
+      (acc, [key, value]) => {
+        if (key === "ruleName") {
+          acc.push(`<a href='${row.url}'>${value}</a>`);
+        } else if (key === "severity") {
+          // Combine replace severity with normalizedSeverity value
+          acc.push(row.normalizedSeverity.toString());
+        } else if (
+          !["endLine", "endColumn", "url", "normalizedSeverity"].includes(key)
+        ) {
+          acc.push(value.toString());
+        }
+        return acc;
+      },
+      [":x:"]
     );
+    return rowValues;
+  });
 
-    const tableRows = flattenedData.map(row => {
-        const rowValues = Object.entries(row).reduce(
-            (acc, [key, value]) => {
-                if (key === 'ruleName') {
-                    acc.push(`<a href='${row.url}'>${value}</a>`);
-                } else if (key === 'severity') {
-                    // Combine replace severity with normalizedSeverity value
-                    acc.push(row.normalizedSeverity.toString());
-                } else if (!['endLine', 'endColumn', 'url', 'normalizedSeverity'].includes(key)) {
-                    acc.push(value.toString());
-                }
-                return acc;
-            },
-            [':x:'],
-        );
-        return rowValues;
-    });
+  await core.summary
+    .addHeading("Legacy Code: SF(DX) Scanner Results")
+    .addTable([headers, ...tableRows])
+    .write();
 
-    await core.summary
-        .addHeading('Legacy Code: SF(DX) Scanner Results')
-        .addTable([headers, ...tableRows])
-        .write();
-
-    console.log('GitHub table added to GitHub Step Summary');
+  console.log("GitHub table added to GitHub Step Summary");
 }
 
 /**
@@ -81,16 +85,16 @@ async function createGithubTable(flattenedData) {
  * @param {Array} flattenedData - The array of flattened JSON objects.
  */
 async function createAnnotations(flattenedData) {
-    flattenedData.forEach(row => {
-        core.error(row.message, {
-            title: row.ruleName,
-            file: row.fileName,
-            startLine: row.line,
-            endLine: row.endLine,
-            startColumn: row.column,
-            endColumn: row.endColumn,
-        });
+  flattenedData.forEach((row) => {
+    core.error(row.message, {
+      title: row.ruleName,
+      file: row.fileName,
+      startLine: row.line,
+      endLine: row.endLine,
+      startColumn: row.column,
+      endColumn: row.endColumn,
     });
+  });
 }
 
 /**
@@ -99,8 +103,8 @@ async function createAnnotations(flattenedData) {
  * @returns {string|null}
  */
 function extractPrNumber(githubRef) {
-    const match = /refs\/pull\/(\d+)\/merge/.exec(githubRef);
-    return match ? match[1] : null;
+  const match = /refs\/pull\/(\d+)\/merge/.exec(githubRef);
+  return match ? match[1] : null;
 }
 
 /**
@@ -110,26 +114,28 @@ function extractPrNumber(githubRef) {
  * @returns {Promise<boolean>} Returns true if a matching record is found.
  */
 async function queryExistingResultFiles(prNumber, hash) {
-    try {
-        const soqlQuery = `SELECT id FROM ContentVersion WHERE Title LIKE '%PR${prNumber}%' AND title LIKE '%${hash}%'`;
-        const queryCommand = [
-            'sf',
-            'data',
-            'query',
-            '--query',
-            `${soqlQuery}`,
-            '--result-format',
-            'json',
-        ];
+  try {
+    const soqlQuery = `SELECT id FROM ContentVersion WHERE Title LIKE '%PR${prNumber}%' AND title LIKE '%${hash}%'`;
+    const queryCommand = [
+      "sf",
+      "data",
+      "query",
+      "--query",
+      `${soqlQuery}`,
+      "--result-format",
+      "json",
+    ];
 
-        const { stdout } = await execa(queryCommand[0], queryCommand.slice(1));
-        const result = JSON.parse(stdout);
+    const { stdout } = await execa(queryCommand[0], queryCommand.slice(1));
+    const result = JSON.parse(stdout);
 
-        return result.records && result.records.length > 0;
-    } catch (error) {
-        console.error('Error querying Salesforce:', error);
-        throw error; // Rethrow to handle in the calling function
-    }
+    console.log("Existing report found:" + JSON.stringify(result));
+
+    return result.records && result.records.length > 0;
+  } catch (error) {
+    console.error("Error querying Salesforce:", error);
+    throw error; // Rethrow to handle in the calling function
+  }
 }
 
 /**
@@ -138,48 +144,48 @@ async function queryExistingResultFiles(prNumber, hash) {
  * @param {*} csvFilePath
  */
 async function uploadCsvToSalesforce(csvFilePath) {
-    try {
-        const githubRef = process.env.GITHUB_REF;
-        const prNumber = extractPrNumber(githubRef);
+  try {
+    const githubRef = process.env.GITHUB_REF;
+    const prNumber = extractPrNumber(githubRef);
 
-        if (!prNumber) {
-            throw new Error('Pull Request number not found');
-        }
-
-        const csvContent = await fs.readFile(csvFilePath, 'utf8');
-        const hash = crypto.createHash('md5').update(csvContent).digest('hex');
-
-        const reportAlreadyExists = queryExistingResultFiles(prNumber, hash);
-
-        if (reportAlreadyExists) {
-            console.log('Report already exists in Salesforce. Skipping upload.');
-            return;
-        }
-
-        const csvContentBase64 = Buffer.from(csvContent).toString('base64');
-
-        let title = path.basename(csvFilePath, path.extname(csvFilePath));
-
-        title = `${title}_PR${prNumber}_${hash}`;
-
-        // Constructing the Salesforce CLI command
-        const command = [
-            'sf',
-            'data',
-            'record',
-            'create',
-            '--sobject',
-            'ContentVersion',
-            '--values',
-            `Title='${title}' PathOnClient='${csvFilePath}' VersionData='${csvContentBase64}'`,
-        ];
-        // Execute the command
-        const { stdout } = await execa(command[0], command.slice(1));
-
-        console.log('Upload successful:', stdout);
-    } catch (error) {
-        console.error('Error uploading CSV to Salesforce:', error);
+    if (!prNumber) {
+      throw new Error("Pull Request number not found");
     }
+
+    const csvContent = await fs.readFile(csvFilePath, "utf8");
+    const hash = crypto.createHash("md5").update(csvContent).digest("hex");
+
+    const reportAlreadyExists = queryExistingResultFiles(prNumber, hash);
+
+    if (reportAlreadyExists) {
+      console.log("Report already exists in Salesforce. Skipping upload.");
+      return;
+    }
+
+    const csvContentBase64 = Buffer.from(csvContent).toString("base64");
+
+    let title = path.basename(csvFilePath, path.extname(csvFilePath));
+
+    title = `${title}_PR${prNumber}_${hash}`;
+
+    // Constructing the Salesforce CLI command
+    const command = [
+      "sf",
+      "data",
+      "record",
+      "create",
+      "--sobject",
+      "ContentVersion",
+      "--values",
+      `Title='${title}' PathOnClient='${csvFilePath}' VersionData='${csvContentBase64}'`,
+    ];
+    // Execute the command
+    const { stdout } = await execa(command[0], command.slice(1));
+
+    console.log("Upload successful:", stdout);
+  } catch (error) {
+    console.error("Error uploading CSV to Salesforce:", error);
+  }
 }
 
 /**
@@ -188,25 +194,27 @@ async function uploadCsvToSalesforce(csvFilePath) {
  * @param {string} csvFilePath - Path to the output CSV file.
  */
 async function processScanResults(jsonFilePath, csvFilePath) {
-    try {
-        const jsonData = await fs.readFile(jsonFilePath, 'utf-8');
-        const dataArray = JSON.parse(jsonData);
-        const flattenedData = flattenJsonData(dataArray);
+  try {
+    const jsonData = await fs.readFile(jsonFilePath, "utf-8");
+    const dataArray = JSON.parse(jsonData);
+    const flattenedData = flattenJsonData(dataArray);
 
-        // Check if 'legacy' is in the jsonFilePath
-        if (jsonFilePath.includes('legacy')) {
-            await convertJsonToCsv(flattenedData, csvFilePath);
-            await createGithubTable(flattenedData);
-            await uploadCsvToSalesforce(csvFilePath);
-        } else {
-            await createAnnotations(flattenedData);
-        }
-    } catch (error) {
-        console.error('Error processing scan results:', error);
+    // Check if 'legacy' is in the jsonFilePath
+    if (jsonFilePath.includes("legacy")) {
+      console.log("Legacy Files detected. Processing results...");
+      await convertJsonToCsv(flattenedData, csvFilePath);
+      await createGithubTable(flattenedData);
+      await uploadCsvToSalesforce(csvFilePath);
+    } else {
+      console.log("Processing results...");
+      await createAnnotations(flattenedData);
     }
+  } catch (error) {
+    console.error("Error processing scan results:", error);
+  }
 }
 
-const jsonFilePath = process.argv[2] || 'scan-results.json';
-const csvFilePath = process.argv[3] || 'scan-results.csv';
+const jsonFilePath = process.argv[2] || "scan-results.json";
+const csvFilePath = process.argv[3] || "scan-results.csv";
 
 processScanResults(jsonFilePath, csvFilePath);
