@@ -115,7 +115,7 @@ function extractPrNumber(githubRef) {
  */
 async function queryExistingResultFiles(prNumber, hash) {
   try {
-    const soqlQuery = `SELECT id FROM ContentVersion WHERE Title LIKE '%PR${prNumber}%' AND title LIKE '%${hash}%'`;
+    const soqlQuery = `SELECT id, title FROM ContentVersion WHERE Title LIKE '%PR${prNumber}%' AND title LIKE '%${hash}%'`;
     const queryCommand = [
       "sf",
       "data",
@@ -129,7 +129,7 @@ async function queryExistingResultFiles(prNumber, hash) {
     const { stdout } = await execa(queryCommand[0], queryCommand.slice(1));
     const result = JSON.parse(stdout);
 
-    console.log("Existing report found:" + JSON.stringify(result));
+    console.log("Existing report found:" + JSON.stringify(result.records));
 
     return result.records && result.records.length > 0;
   } catch (error) {
@@ -154,6 +154,9 @@ async function uploadCsvToSalesforce(csvFilePath) {
 
     const csvContent = await fs.readFile(csvFilePath, "utf8");
     const hash = crypto.createHash("md5").update(csvContent).digest("hex");
+
+    console.log("PR Number:", prNumber);
+    console.log("Hash:", hash);
 
     const reportAlreadyExists = queryExistingResultFiles(prNumber, hash);
 
