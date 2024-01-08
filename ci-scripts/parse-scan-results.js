@@ -129,7 +129,7 @@ async function queryExistingResultFiles(prNumber, hash) {
     const { stdout } = await execa(queryCommand[0], queryCommand.slice(1));
     const result = JSON.parse(stdout);
 
-    console.log("Existing report found:" + JSON.stringify(result.records));
+    console.log("Existing report found:" + JSON.stringify(result));
 
     return result.records && result.records.length > 0;
   } catch (error) {
@@ -158,7 +158,7 @@ async function uploadCsvToSalesforce(csvFilePath) {
     console.log("PR Number:", prNumber);
     console.log("Hash:", hash);
 
-    const reportAlreadyExists = queryExistingResultFiles(prNumber, hash);
+    const reportAlreadyExists = await queryExistingResultFiles(prNumber, hash);
 
     if (reportAlreadyExists) {
       console.log("Report already exists in Salesforce. Skipping upload.");
