@@ -129,8 +129,6 @@ async function queryExistingResultFiles(prNumber, hash) {
     const { stdout } = await execa(queryCommand[0], queryCommand.slice(1));
     const result = JSON.parse(stdout);
 
-    console.log("Existing report found:" + JSON.stringify(result));
-
     return result.records && result.records.length > 0;
   } catch (error) {
     console.error("Error querying Salesforce:", error);
