@@ -10,7 +10,7 @@
     <rule
         name="PrefixSubflowLabel"
         language="xml"
-        message="A Subflow's label should start with SFL"
+        message="A Subflow's label should start with Util"
         class="net.sourceforge.pmd.lang.rule.XPathRule"
     >
         <description>
@@ -22,7 +22,7 @@
             <property name="xpath">
                 <value>
             <![CDATA[
-            /Flow/label/text[not(starts-with(@Image,'SFL')) and //Flow/processType/text[@Image = 'AutoLaunchedFlow']]
+            /Flow/label/text[not(starts-with(@Image,'Util')) and //Flow/processType/text[@Image = 'AutoLaunchedFlow']]
             ]]>
         </value>
             </property>
@@ -32,7 +32,7 @@
     <rule
         name="PrefixSubflowApiName"
         language="xml"
-        message="A Subflow's API Name should start with SFL"
+        message="A Subflow's API Name should start with Util"
         class="net.sourceforge.pmd.lang.rule.XPathRule"
     >
         <description>
@@ -44,7 +44,7 @@
             <property name="xpath">
                 <value>
             <![CDATA[
-            /Flow/processType/text[@Image = 'AutoLaunchedFlow' and not(starts-with(pmd:fileName(),'SFL'))]
+            /Flow/processType/text[@Image = 'AutoLaunchedFlow' and not(starts-with(pmd:fileName(),'Util'))]
             ]]>
         </value>
             </property>
@@ -89,7 +89,7 @@
             <property name="xpath">
                 <value>
             <![CDATA[
-            /Flow//variables/name/text[not(ends-with(@Image,'_VAR') or ends-with(@Image,'_Filter'))]
+            /Flow//variables/name/text[not(ends-with(@Image,'_VAR') or ends-with(@Image,'_FILTER') or ends-with(@Image,'recordId'))]
             ]]>
         </value>
             </property>
