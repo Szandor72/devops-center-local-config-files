@@ -127,9 +127,9 @@ async function queryExistingResultFiles(prNumber, hash) {
     ];
 
     const { stdout } = await execa(queryCommand[0], queryCommand.slice(1));
-    const result = JSON.parse(stdout);
+    const response = JSON.parse(stdout);
 
-    return result.records && result.records.length > 0;
+    return response?.result?.records?.length > 0;
   } catch (error) {
     console.error("Error querying Salesforce:", error);
     throw error; // Rethrow to handle in the calling function
