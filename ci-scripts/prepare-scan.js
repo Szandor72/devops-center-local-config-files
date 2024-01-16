@@ -1,21 +1,21 @@
 // determines which files need to be treated as legacy files and scanned differently within GitHub Action context
-import execa from 'execa';
-import fsExtra from 'fs-extra';
-import path from 'path';
+import execa from "execa";
+import fsExtra from "fs-extra";
+import path from "path";
 
 // File path identifier for Salesforce files
-const FILE_PATH_IDENTIFIER = 'force-app';
+const FILE_PATH_IDENTIFIER = "force-app";
 
 // List of legacy code files
-const LEGACY_METADATA_FILE_LIST = '.ci/legacy-metadata-files.txt';
-const LEGACY_DESTINATION_DIR = 'legacy-metadata';
+const LEGACY_METADATA_FILE_LIST = ".ci/legacy-metadata-files.txt";
+const LEGACY_DESTINATION_DIR = "legacy-metadata";
 
 /**
  * Determines if the script is running in the context of a Pull Request.
  * @returns {boolean} True if in PR context, false otherwise.
  */
 function isPullRequest() {
-    return process.env.GITHUB_EVENT_NAME === 'pull_request';
+  return process.env.GITHUB_EVENT_NAME === "pull_request";
 }
 
 /**
@@ -24,22 +24,22 @@ function isPullRequest() {
  * @returns {string} The commit range.
  */
 async function getRangeForDiff() {
-    try {
-        const baseRef = process.env.GITHUB_BASE_REF;
-        const headRef = process.env.GITHUB_HEAD_REF;
+  try {
+    const baseRef = process.env.GITHUB_BASE_REF;
+    const headRef = process.env.GITHUB_HEAD_REF;
 
-        if (baseRef && headRef) {
-            const fullBaseRef = `refs/remotes/origin/${baseRef}`;
-            const fullHeadRef = `refs/remotes/origin/${headRef}`;
-            return `${fullBaseRef}...${fullHeadRef}`;
-        } else {
-            console.warn('Not in a PR context. Exiting script.');
-            process.exit(0);
-        }
-    } catch (error) {
-        console.error('Error determining the commit range:', error);
-        throw error;
+    if (baseRef && headRef) {
+      const fullBaseRef = `refs/remotes/origin/${baseRef}`;
+      const fullHeadRef = `refs/remotes/origin/${headRef}`;
+      return `${fullBaseRef}...${fullHeadRef}`;
+    } else {
+      console.warn("Not in a PR context. Exiting script.");
+      process.exit(0);
     }
+  } catch (error) {
+    console.error("Error determining the commit range:", error);
+    throw error;
+  }
 }
 
 /**
@@ -48,13 +48,15 @@ async function getRangeForDiff() {
  * @returns {Promise<string[]>} A list of modified files.
  */
 async function getModifiedFiles(range) {
-    try {
-        const { stdout } = await execa.command(`git diff --name-only --diff-filter=AMCR\ ${range}`);
-        return stdout.split('\n');
-    } catch (error) {
-        console.error('Error retrieving modified files:', error);
-        throw error;
-    }
+  try {
+    const { stdout } = await execa.command(
+      `git diff --name-only --diff-filter=AMCR\ ${range}`
+    );
+    return stdout.split("\n");
+  } catch (error) {
+    console.error("Error retrieving modified files:", error);
+    throw error;
+  }
 }
 
 /**
@@ -63,7 +65,7 @@ async function getModifiedFiles(range) {
  * @returns {string[]} Filtered file paths.
  */
 function filterFiles(files) {
-    return files.filter(file => file.includes(FILE_PATH_IDENTIFIER));
+  return files.filter((file) => file.includes(FILE_PATH_IDENTIFIER));
 }
 
 /**
@@ -71,13 +73,16 @@ function filterFiles(files) {
  * @returns {Promise<string[]>} Array of legacy code file paths.
  */
 async function readLegacyCodeFileList() {
-    try {
-        const data = await fsExtra.readFile(LEGACY_METADATA_FILE_LIST, 'utf8');
-        return data.split('\n');
-    } catch (error) {
-        console.error('Error reading legacy code file list:', error);
-        throw error;
-    }
+  try {
+    const data = await fsExtra.readFile(LEGACY_METADATA_FILE_LIST, "utf8");
+    const fileList = data
+      .split("\n")
+      .filter((line) => line !== "" && !line.startsWith("#"));
+    return fileList;
+  } catch (error) {
+    console.error("Error reading legacy code file list:", error);
+    throw error;
+  }
 }
 
 /**
@@ -86,14 +91,14 @@ async function readLegacyCodeFileList() {
  * @param {string} destination - Destination file path.
  */
 async function moveFile(source, destination) {
-    try {
-        await fsExtra.ensureDir(path.dirname(destination));
-        await fsExtra.move(source, destination);
-        return destination;
-    } catch (error) {
-        console.error(`Error moving file ${source} to ${destination}:`, error);
-        throw error;
-    }
+  try {
+    await fsExtra.ensureDir(path.dirname(destination));
+    await fsExtra.move(source, destination);
+    return destination;
+  } catch (error) {
+    console.error(`Error moving file ${source} to ${destination}:`, error);
+    throw error;
+  }
 }
 
 /**
@@ -103,22 +108,22 @@ async function moveFile(source, destination) {
  * @param {string[]} legacyFiles - Array of legacy file paths.
  */
 async function processLegacyFiles(modifiedFiles, legacyFiles) {
-    const processedLegacyFiles = [];
+  const processedLegacyFiles = [];
 
-    try {
-        for (const file of modifiedFiles) {
-            if (legacyFiles.includes(file)) {
-                const destPath = path.join(LEGACY_DESTINATION_DIR, file);
-                const newDestination = await moveFile(file, destPath);
-                processedLegacyFiles.push(newDestination);
-            }
-        }
-    } catch (error) {
-        console.error('Error processing files:', error);
-        throw error;
+  try {
+    for (const file of modifiedFiles) {
+      if (legacyFiles.includes(file)) {
+        const destPath = path.join(LEGACY_DESTINATION_DIR, file);
+        const newDestination = await moveFile(file, destPath);
+        processedLegacyFiles.push(newDestination);
+      }
     }
+  } catch (error) {
+    console.error("Error processing files:", error);
+    throw error;
+  }
 
-    return processedLegacyFiles;
+  return processedLegacyFiles;
 }
 
 /**
@@ -126,45 +131,48 @@ async function processLegacyFiles(modifiedFiles, legacyFiles) {
  * @param {string[]} fileList - Array of legacy file paths.
  */
 async function printFiles(fileList) {
-    try {
-        for (const file of fileList) {
-            console.log(path.resolve(file));
-        }
-    } catch (error) {
-        console.error('Error printing legacy files:', error);
-        throw error;
+  try {
+    for (const file of fileList) {
+      console.log(path.resolve(file));
     }
+  } catch (error) {
+    console.error("Error printing legacy files:", error);
+    throw error;
+  }
 }
 
 // Main execution function
 async function main() {
-    try {
-        if (!isPullRequest()) {
-            console.info('Script is not running in a Pull Request context. Exiting.');
-            return;
-        }
-
-        const range = await getRangeForDiff();
-        const modifiedFiles = await getModifiedFiles(range);
-        const filteredFiles = filterFiles(modifiedFiles);
-        const legacyFiles = await readLegacyCodeFileList();
-
-        const processedLegacyFiles = await processLegacyFiles(filteredFiles, legacyFiles);
-
-        console.log('**MODIFIED FILES**');
-        await printFiles(modifiedFiles);
-
-        console.log('**FILTERED FILES**');
-        await printFiles(filteredFiles);
-
-        console.log('**LEGACY FILES**');
-        await printFiles(processedLegacyFiles);
-
-        console.log('File processing complete.');
-    } catch (error) {
-        console.error('Error in main execution:', error);
-        process.exit(1);
+  try {
+    if (!isPullRequest()) {
+      console.info("Script is not running in a Pull Request context. Exiting.");
+      return;
     }
+
+    const range = await getRangeForDiff();
+    const modifiedFiles = await getModifiedFiles(range);
+    const filteredFiles = filterFiles(modifiedFiles);
+    const legacyFiles = await readLegacyCodeFileList();
+
+    const processedLegacyFiles = await processLegacyFiles(
+      filteredFiles,
+      legacyFiles
+    );
+
+    console.log("**MODIFIED FILES**");
+    await printFiles(modifiedFiles);
+
+    console.log("**FILTERED FILES**");
+    await printFiles(filteredFiles);
+
+    console.log("**LEGACY FILES**");
+    await printFiles(processedLegacyFiles);
+
+    console.log("File processing complete.");
+  } catch (error) {
+    console.error("Error in main execution:", error);
+    process.exit(1);
+  }
 }
 
 // Run the main function

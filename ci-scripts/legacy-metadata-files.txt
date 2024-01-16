@@ -1,0 +1,2 @@
+# Add all files the should be treated as legacy files here, e.g.:
+# force-app\main\default\classes\ContentDocumentTriggerHandler.cls

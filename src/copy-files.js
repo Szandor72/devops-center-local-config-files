@@ -18,6 +18,14 @@ const ciScripts = [
     src: path.join(sourcePath, "ci-scripts", "parse-scan-results.js"),
     dest: path.join(targetPath, ".ci", "parse-scan-results.js"),
   },
+  {
+    src: path.join(sourcePath, "ci-scripts", "legacy-metadata-files.txt"),
+    dest: path.join(targetPath, ".ci", "legacy-metadata-files.txt"),
+  },
+  {
+    src: path.join(sourcePath, "ci-scripts", "create-manifest.js"),
+    dest: path.join(targetPath, ".ci", "create-manifest.js"),
+  },
 ];
 
 const eslintConfigFiles = [
