@@ -14,7 +14,13 @@ async function querySourceMembers(branchName) {
     return [];
   }
   try {
-    const soqlQuery = `SELECT Id, Name, sf_devops__Source_Component__c FROM sf_devops__Remote_Change__c WHERE sf_devops__Change_Submission__r.sf_devops__Work_Item__r.Name = '${branchName}'`;
+    const soqlQuery = `SELECT Id, 
+                              Name, 
+                              sf_devops__Source_Component__c 
+                       FROM sf_devops__Remote_Change__c 
+                       WHERE (sf_devops__Remote_Change_Type__c = 'ADD' 
+                              OR sf_devops__Remote_Change_Type__c = 'CHANGE') 
+                       AND sf_devops__Change_Submission__r.sf_devops__Work_Item__r.Name = '${branchName}'`;
     const queryCommand = [
       "sf",
       "data",
