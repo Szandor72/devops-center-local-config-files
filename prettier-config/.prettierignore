@@ -8,4 +8,7 @@
 .sf
 .vscode
 
+#devops center local tooling
+.ci
+
 coverage/
