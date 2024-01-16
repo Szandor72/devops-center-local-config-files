@@ -1,9 +1,6 @@
 // queries devops center production org to get all metadata components which need deployment. Will create a manifest file with the results
-// query: select id, name, sf_devops__Source_Component__c from sf_devops__Remote_Change__c where sf_devops__Change_Submission__r.sf_devops__Work_Item__r.Name = 'WI-000030'
 
 import execa from "execa";
-
-const DEVOPS_CENTER_HOME_ORGANIZATION = "OHEV-PROD";
 
 /**
  * Queries Salesforce for source members based on the branch name.
@@ -22,14 +19,12 @@ async function querySourceMembers(branchName) {
       `${soqlQuery}`,
       "--result-format",
       "json",
-      "--target-org",
-      DEVOPS_CENTER_HOME_ORGANIZATION,
     ];
 
     const { stdout } = await execa(queryCommand[0], queryCommand.slice(1));
-    const result = JSON.parse(stdout);
+    const response = JSON.parse(stdout);
 
-    return result?.records?.length > 0 ? result.records : [];
+    return response?.result?.records?.length > 0 ? response.result.records : [];
   } catch (error) {
     console.error("Error querying Salesforce:", error);
     throw error; // Rethrow to handle in the calling function
@@ -39,9 +34,12 @@ async function querySourceMembers(branchName) {
 /**
  * Generates the package.xml content based on the queried records.
  * @param {Array} records - The queried records.
- * @returns {Promise<string>} - A promise that resolves to the package.xml content.
  */
 async function generatePackageXml(records) {
+  if (records.length == 0) {
+    console.warn("No records found. Skipping package.xml generation");
+    return;
+  }
   let metadata_list = new Array();
   records.forEach((record) => {
     metadata_list.push("--metadata");
@@ -52,10 +50,9 @@ async function generatePackageXml(records) {
       "project",
       "generate",
       "manifest",
-      "",
       ...metadata_list,
     ]);
-    return stdout;
+    console.log(stdout);
   } catch (error) {
     console.error("Error generating package.xml:", error);
     throw error; // Rethrow to handle in the calling function
