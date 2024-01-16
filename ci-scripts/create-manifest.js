@@ -1,5 +1,5 @@
 // queries devops center production org to get all metadata components which need deployment. Will create a manifest file with the results
-
+// will run against sf cli default org, so make sure to set it properly before running this script
 import execa from "execa";
 
 /**
@@ -9,6 +9,10 @@ import execa from "execa";
  * @throws {Error} - If there is an error querying Salesforce.
  */
 async function querySourceMembers(branchName) {
+  if (!branchName) {
+    console.error("Branch name not provided. Skipping manifest generation");
+    return [];
+  }
   try {
     const soqlQuery = `SELECT Id, Name, sf_devops__Source_Component__c FROM sf_devops__Remote_Change__c WHERE sf_devops__Change_Submission__r.sf_devops__Work_Item__r.Name = '${branchName}'`;
     const queryCommand = [
