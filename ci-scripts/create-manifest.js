@@ -1,5 +1,8 @@
-// queries devops center production org to get all metadata components which need deployment. Will create a manifest file with the results
-// will run against sf cli default org, so make sure to set it properly before running this script
+/**
+ * queries devops center production org to get all metadata components which need deployment.
+ * Will create a manifest file with the results
+ * will run against sf cli default org, so make sure to set it properly before running this script
+ */
 import execa from "execa";
 
 /**
@@ -8,25 +11,28 @@ import execa from "execa";
  * @returns {Promise<boolean>} - A promise that resolves to true if records are found, false otherwise.
  * @throws {Error} - If there is an error querying Salesforce.
  */
-async function querySourceMembers(branchName) {
+async function querySubmittedComponents(branchName) {
   if (!branchName) {
     console.error("Branch name not provided. Skipping manifest generation");
     return [];
   }
   try {
     const soqlQuery = `SELECT Id, 
-                              Name, 
-                              sf_devops__Source_Component__c 
-                       FROM sf_devops__Remote_Change__c 
-                       WHERE (sf_devops__Remote_Change_Type__c = 'ADD' 
-                              OR sf_devops__Remote_Change_Type__c = 'CHANGE') 
-                       AND sf_devops__Change_Submission__r.sf_devops__Work_Item__r.Name = '${branchName}'`;
+                          CreatedDate, 
+                          sf_devops__Source_Component__c, 
+                          sf_devops__File_Path__c, 
+                          sf_devops__Operation__c 
+                       FROM sf_devops__Submit_Component__c 
+                       WHERE sf_devops__Empty__c = false 
+                          AND sf_devops__Change_Submission__r.sf_devops__Work_Item__r.Name = '${branchName}' 
+                       ORDER BY CreatedDate ASC`;
+
     const queryCommand = [
       "sf",
       "data",
       "query",
       "--query",
-      `${soqlQuery}`,
+      soqlQuery.replace(/\n/g, ""),
       "--result-format",
       "json",
     ];
@@ -42,18 +48,45 @@ async function querySourceMembers(branchName) {
 }
 
 /**
- * Generates the package.xml content based on the queried records.
+ * Parses the queried records to determine which components need to be deployed.
+ * If the last operation is REMOVE, the component is not included because it
+ * needs to be treated as destructive change
  * @param {Array} records - The queried records.
  */
-async function generatePackageXml(records) {
-  if (records.length == 0) {
-    console.warn("No records found. Skipping package.xml generation");
+function parseOperations(records) {
+  let componentsWithOperations = new Map();
+  records.forEach((record) => {
+    if (!componentsWithOperations.has(record.sf_devops__Source_Component__c)) {
+      componentsWithOperations.set(record.sf_devops__Source_Component__c, []);
+    }
+    componentsWithOperations.get(record.sf_devops__Source_Component__c).push({
+      operation: record.sf_devops__Operation__c,
+      date: record.CreatedDate,
+    });
+  });
+
+  const componentsToDeploy = new Array();
+  componentsWithOperations.forEach((operationDetails, metadataComponent) => {
+    if (operationDetails[operationDetails.length - 1].operation != "REMOVE") {
+      componentsToDeploy.push(metadataComponent);
+    }
+  });
+  return componentsToDeploy;
+}
+
+/**
+ * Generates the package.xml content based on a list of component names.
+ * @param {Array} componentsToDeploy - The list of component names (eg ApexClass:AccountService)
+ */
+async function generatePackageXml(componentsToDeploy) {
+  if (componentsToDeploy.length == 0) {
+    console.warn("No components found. Skipping package.xml generation");
     return;
   }
-  let metadata_list = new Array();
-  records.forEach((record) => {
+  const metadata_list = new Array();
+  componentsToDeploy.forEach((componentName) => {
     metadata_list.push("--metadata");
-    metadata_list.push(record.sf_devops__Source_Component__c);
+    metadata_list.push(componentName);
   });
   try {
     const { stdout } = await execa("sf", [
@@ -70,5 +103,6 @@ async function generatePackageXml(records) {
 }
 
 const branchName = process.argv[2];
-const changedComponents = await querySourceMembers(branchName);
-await generatePackageXml(changedComponents);
+const changedComponents = await querySubmittedComponents(branchName);
+const componentsToDeploy = parseOperations(changedComponents);
+await generatePackageXml(componentsToDeploy);

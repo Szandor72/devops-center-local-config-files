@@ -121,7 +121,7 @@ async function queryExistingResultFiles(prNumber, hash) {
       "data",
       "query",
       "--query",
-      `${soqlQuery}`,
+      soqlQuery.replace(/\n/g, ""),
       "--result-format",
       "json",
     ];
